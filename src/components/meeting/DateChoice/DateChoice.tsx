@@ -3,8 +3,8 @@ import 'react-datepicker/dist/react-datepicker.css'
 import styled from 'styled-components'
 
 interface Props {
-  meetingDate: string | null
-  handleDateChange: (date: string) => void
+  meetingDate: Date | null | undefined
+  handleDateChange: (date: Date) => void
 }
 
 function DateChoice({ meetingDate, handleDateChange }: Props): JSX.Element {
@@ -15,7 +15,7 @@ function DateChoice({ meetingDate, handleDateChange }: Props): JSX.Element {
         dateFormat="yyyy년 MM월 dd일"
         selected={meetingDate}
         shouldCloseOnSelect
-        onChange={(date: string) => {
+        onChange={(date: Date) => {
           handleDateChange(date)
         }}
         minDate={new Date()}

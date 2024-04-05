@@ -25,9 +25,9 @@ import { postMeetingData } from '@/apis/meeting'
 
 export interface Info {
   meetingName: string
-  meetingDate: string | null
-  meetingStartTime: string | null
-  meetingEndTime: string | null
+  meetingDate: Date | null | undefined
+  meetingStartTime: Date | null | undefined
+  meetingEndTime: Date | null | undefined
   budget: number
   contents: string
   totalCount: number
@@ -75,14 +75,14 @@ function RegisterMeeting(): JSX.Element {
     }))
   }
 
-  const handleDateChange = (date: string): void => {
+  const handleDateChange = (date: Date): void => {
     setInfo((prevState) => ({
       ...prevState,
       meetingDate: date,
     }))
   }
 
-  const handleStartTimeChange = (time: string | null): void => {
+  const handleStartTimeChange = (time: Date | null): void => {
     // console.log('time111111', time)
     setInfo((prevState) => ({
       ...prevState,
@@ -90,7 +90,7 @@ function RegisterMeeting(): JSX.Element {
     }))
   }
 
-  const handleEndTimeChange = (time: string | null): void => {
+  const handleEndTimeChange = (time: Date | null): void => {
     setInfo((prevState) => ({
       ...prevState,
       meetingEndTime: time,
@@ -136,6 +136,7 @@ function RegisterMeeting(): JSX.Element {
 
   const postMutation = useMutation<any, unknown, Info>({
     mutationFn: async (newMeetingData: Info) => {
+      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
       const response = await postMeetingData(newMeetingData)
       return response
     },
@@ -148,10 +149,10 @@ function RegisterMeeting(): JSX.Element {
     },
   })
 
-  const handleMeetingSubmit = () => {
+  const handleMeetingSubmit = (): void => {
     const newMeetingData = {
       meetingName: info.meetingName,
-      meetingDate: dateFormat,
+      meetingDate: dateFormat as unknown as Date,
       meetingStartTime: info.meetingStartTime,
       meetingEndTime: info.meetingEndTime,
       budget: info.budget,

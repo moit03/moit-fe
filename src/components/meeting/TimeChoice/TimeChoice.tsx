@@ -4,10 +4,10 @@ import styled from 'styled-components'
 import { InputBox } from '../../../pages/Meeting/styles'
 
 interface TimeChoiceProps {
-  startTime: string | null
-  endTime: string | null
-  handleStartTimeChange: (time: string | null) => void
-  handleEndTimeChange: (time: string | null) => void
+  startTime: Date | null | undefined
+  endTime: Date | null | undefined
+  handleStartTimeChange: (time: Date | null) => void
+  handleEndTimeChange: (time: Date | null) => void
 }
 
 function TimeChoice({
