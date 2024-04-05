@@ -1,6 +1,7 @@
 import { Map, MapMarker } from 'react-kakao-maps-sdk'
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import useMap from '@/hooks/useMap'
 import Meetings from '@/components/meeting/Meetings/Meetings'
 import { FilterBox, MainLayout } from './styles'
@@ -98,71 +99,105 @@ export default function Home(): JSX.Element {
     )
   }
 
+  const navi = useNavigate()
+
   return (
-    <MainLayout>
-      <Map
-        center={{
-          lat: 37.5667,
-          lng: 126.9784,
-        }}
-        style={{
-          width: '100%',
-          height: '100%',
-        }}
-        maxLevel={3}
-        minLevel={11}
-        onCreate={(maps) => {
-          setMapElement(maps)
-        }}
-      >
-        {meetings?.map(
-          ({ meetingName, meetingId, locationLat, locationLng }) => (
-            <MapMarker
-              key={`${meetingId}`}
-              title={meetingName}
-              image={{
-                src: 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
-                size: {
-                  width: 20,
-                  height: 30,
-                },
-              }}
-              position={{ lat: locationLat, lng: locationLng }}
-            />
-          )
-        )}
-      </Map>
-      <Meetings meetings={meetings ?? []} />
-      <FilterBox>
-        <ModalBtn
-          type="button"
-          onClick={() => {
-            getUserLocation(resetMaptoUserLocation)
+    <>
+      <MainLayout>
+        <Map
+          center={{
+            lat: 37.5667,
+            lng: 126.9784,
+          }}
+          style={{
+            width: '100%',
+            height: '100%',
+          }}
+          maxLevel={3}
+          minLevel={11}
+          onCreate={(maps) => {
+            setMapElement(maps)
           }}
         >
-          내 위치
-        </ModalBtn>
-        <ModalBtn type="button" onClick={setCurrentCenter}>
-          재조회
-        </ModalBtn>
-        <ModalBtn
-          type="button"
-          onClick={() => {
-            setIsShow(true)
-          }}
-        >
-          모임 지역
-        </ModalBtn>
-        {isShow && (
-          <Region
-            handleModalClose={() => {
-              setIsShow(!isShow)
+          {meetings?.map(
+            ({ meetingName, meetingId, locationLat, locationLng }) => (
+              <MapMarker
+                key={`${meetingId}`}
+                title={meetingName}
+                image={{
+                  src: 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
+                  size: {
+                    width: 20,
+                    height: 30,
+                  },
+                }}
+                position={{ lat: locationLat, lng: locationLng }}
+              />
+            )
+          )}
+        </Map>
+        <Meetings meetings={meetings ?? []} />
+        <FilterBox>
+          <ModalBtn
+            type="button"
+            onClick={() => {
+              getUserLocation(resetMaptoUserLocation)
             }}
-          />
-        )}
-        {/* <TechStack /> */}
-        <Career />
-      </FilterBox>
-    </MainLayout>
+          >
+            내 위치
+          </ModalBtn>
+          <ModalBtn type="button" onClick={setCurrentCenter}>
+            재조회
+          </ModalBtn>
+          <ModalBtn
+            type="button"
+            onClick={() => {
+              setIsShow(true)
+            }}
+          >
+            모임 지역
+          </ModalBtn>
+          {isShow && (
+            <Region
+              handleModalClose={() => {
+                setIsShow(!isShow)
+              }}
+            />
+          )}
+          {/* <TechStack /> */}
+          <Career />
+        </FilterBox>
+      </MainLayout>
+      <div style={{ display: 'flex', gap: '20px', margin: '10px' }}>
+        <button
+          onClick={() => {
+            navi('/auth')
+          }}
+          type="button"
+          style={{
+            height: '40px',
+            background: '#ddd',
+            padding: '5px',
+            borderRadius: '12px',
+          }}
+        >
+          로그인
+        </button>
+        <button
+          onClick={() => {
+            navi('/meetings')
+          }}
+          type="button"
+          style={{
+            height: '40px',
+            background: '#ddd',
+            padding: '5px',
+            borderRadius: '12px',
+          }}
+        >
+          모임 생성
+        </button>
+      </div>
+    </>
   )
 }

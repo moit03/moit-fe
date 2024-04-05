@@ -4,6 +4,7 @@ import Login from '@/pages/Login/Login'
 import Layout from './Layout'
 import Search from '@/pages/Search/Search'
 import RegisterMeeting from '@/pages/Meeting/RegisterMeeting'
+import LoginModal from '@/components/modal/LoginModal'
 
 function Router(): JSX.Element {
   return (
@@ -14,6 +15,7 @@ function Router(): JSX.Element {
           <Route path="/search" element={<Search />} />
           <Route path="/login/:service" element={<Login />} />
           <Route path="/meetings" element={<RegisterMeeting />} />
+          <Route path="/auth" element={<LoginModal />} />
         </Route>
       </Routes>
     </BrowserRouter>
