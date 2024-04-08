@@ -8,7 +8,7 @@ import {
   FilterTitle,
   ModalBtn,
 } from './styles'
-import CommonButton from '../Button/CommonButton'
+import CommonButton from '@/components/common/Button/CommonButton'
 
 function FilterFrame(): JSX.Element {
   const [isShow, setIsShow] = useState(false)

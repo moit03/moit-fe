@@ -1,6 +1,6 @@
 import styled from 'styled-components'
-import { Background } from '../common/FilterFrame/styles'
 import ModalPortal from './ModalPortal'
+import { Background } from '../filter/FilterFrame/styles'
 
 interface AlertModalProps {
   onClose: () => void

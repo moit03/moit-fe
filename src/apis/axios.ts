@@ -6,6 +6,7 @@ const instance = axios.create({
 })
 
 instance.interceptors.request.use((config) => {
+  console.log(config)
   const token = localStorage.getItem('accessToken')
   if (token != null) {
     const authConfig = config

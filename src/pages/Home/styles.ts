@@ -1,16 +1,20 @@
 import styled from 'styled-components'
 
-const MainLayout = styled.div`
+export const HomeLayout = styled.div`
   width: 100%;
   height: 100%;
   position: relative;
-  overflow: scroll;
-  z-index: 0;
+  overflow: hidden;
 `
 
-const FilterBox = styled.div`
+export const MapBox = styled.div`
+  width: 100%;
+  height: 100%;
+`
+
+export const FilterBox = styled.div`
+  width: 100%;
   position: absolute;
   top: 0;
-  z-index: 1;
+  z-index: 2;
 `
-export { MainLayout, FilterBox }

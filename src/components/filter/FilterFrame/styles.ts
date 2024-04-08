@@ -8,18 +8,20 @@ export const ModalBtn = styled.button`
 `
 
 export const Background = styled.div`
-  height: 100vh;
+  height: 100%;
+  max-height: 844px;
   width: 24.375rem;
   position: fixed;
   left: 0;
   top: 0;
   background: rgba(0, 0, 0, 0.3);
+  z-index: 99;
 `
 
 export const FilterContainer = styled.div`
   width: 24.375rem;
-  position: fixed;
-  bottom: 0;
+  position: absolute;
+  bottom: 0px;
   left: 0;
   border: 0.0625rem solid #d9d9d9;
   border-radius: 1.25rem 1.25rem 0 0;
@@ -55,7 +57,7 @@ export const BottomBox = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.125rem;
-  position: fixed;
+  position: absolute;
   bottom: 0;
   left: 0;
   background-color: #ffffff;

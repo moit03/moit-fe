@@ -10,6 +10,10 @@ const getUserLocation = (callback: PositionCallback): void => {
       callback,
       (error) => {
         console.log(error)
+        if (error.code === 1)
+          window.alert(
+            '브라우저 설정에서 사용자 위치 확인 허용 시 내 위치 확인이 가능합니다'
+          )
       },
       options
     )

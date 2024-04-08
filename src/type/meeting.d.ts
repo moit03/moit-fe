@@ -3,7 +3,7 @@ export interface Center {
   lng: number
 }
 
-export interface GetMeetingType {
+export interface GetMeeting {
   meetingId: number
   meetingName: string
   registeredCount: number

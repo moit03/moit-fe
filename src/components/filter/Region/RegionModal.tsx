@@ -1,6 +1,5 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import CommonButton from '../Button/CommonButton'
 import ModalPortal from '@/components/modals/ModalPortal'
 import {
   Background,
@@ -14,38 +13,50 @@ import {
 import { filterKeys } from '@/constants/queryKeys'
 import { getFirstRegions, getSecondRegions } from '@/apis/filter'
 import { type SecondRegion, type FirstRegion } from '@/type/filter'
+import CommonButton from '@/components/common/Button/CommonButton'
+import { type Center } from '@/type/meeting'
+import { getLocalStorageItem, setLocalStorageItem } from '@/util/localStorage'
 
-interface RegionProps {
+interface RegionModalProps {
+  selectedFilters: number[]
+  handleSelectedFilters: (selectedNums: number[]) => void
+  handleSetCenter: (value: Center) => void
   handleModalClose: () => void
 }
 
-export default function Region({
+export default function RegionModal({
+  selectedFilters,
+  handleSelectedFilters,
+  handleSetCenter,
   handleModalClose,
-}: RegionProps): JSX.Element | null {
+}: RegionModalProps): JSX.Element | null {
   const { data: firstRegions } = useQuery({
     queryKey: filterKeys.firstRegion,
     queryFn: async () => await getFirstRegions(),
   })
-  //
+
   const [selectedFirstRegion, setSelectedFirstRegion] = useState(
-    localStorage.getItem('firstRegion') ?? '1'
+    (getLocalStorageItem('firstRegion') as string) ?? ''
   )
 
-  const localSecondRegion = localStorage.getItem('secondRegion')
-  const [selectedSecondRegion, setSelectedSecondRegion] =
-    useState<SecondRegion>(
-      localSecondRegion !== null
-        ? (JSON.parse(localSecondRegion) as SecondRegion)
-        : {
-            regionSecondId: 1,
-            regionSecondName: '서울 전체',
-          }
-    )
+  const [selectedSecondRegion, setSelectedSecondRegion] = useState<number[]>(
+    selectedFilters ?? []
+  )
 
   const { data: secondRegions } = useQuery({
     queryKey: filterKeys.secondRegion(selectedFirstRegion),
     queryFn: async () => await getSecondRegions(selectedFirstRegion),
+    enabled: !(selectedFirstRegion.length === 0),
   })
+
+  const handleSecondRegionClick = (regionItem: number): void => {
+    setSelectedSecondRegion((prevRegion) => {
+      if (prevRegion.includes(regionItem)) {
+        return prevRegion.filter((item) => item !== regionItem)
+      }
+      return [regionItem]
+    })
+  }
 
   const renderFirstRegions = ({
     regionFirstId,
@@ -75,47 +86,45 @@ export default function Region({
       <button
         type="button"
         className={
-          selectedSecondRegion.regionSecondId === regionSecondId
-            ? 'selected'
-            : ''
+          selectedSecondRegion.includes(regionSecondId) ? 'selected' : ''
         }
         onClick={() => {
-          setSelectedSecondRegion({ regionSecondId, regionSecondName })
+          handleSecondRegionClick(regionSecondId)
         }}
       >
         <span>{regionSecondName}</span>
         <span>
-          {String(selectedSecondRegion.regionSecondId) ===
-            String(regionSecondId) && <span>V</span>}
+          {selectedSecondRegion.includes(regionSecondId) && <span>V</span>}
         </span>
       </button>
     </li>
   )
 
   const handleResetClick = (): void => {
-    setSelectedFirstRegion('1')
-    setSelectedSecondRegion({
-      regionSecondId: 1,
-      regionSecondName: '서울 전체',
-    })
+    setSelectedSecondRegion([])
+    setSelectedFirstRegion('')
+  }
+
+  const handleDeleteRegionClick = (regionId: number): void => {
+    setSelectedSecondRegion((prevRegion) =>
+      prevRegion.filter((item) => item !== regionId)
+    )
   }
 
   const handleSelectClick = (): void => {
-    localStorage.setItem(
-      'firstRegion',
-      selectedSecondRegion.regionSecondId === 0 ? '1' : selectedFirstRegion
+    const currentValue = secondRegions?.find(
+      ({ regionSecondId }) => regionSecondId === selectedSecondRegion[0]
     )
-    localStorage.setItem(
-      'secondRegion',
-      JSON.stringify(
-        selectedSecondRegion.regionSecondId === 0
-          ? {
-              regionSecondId: 1,
-              regionSecondName: '서울 전체',
-            }
-          : selectedSecondRegion
-      )
-    )
+    if (currentValue != null) {
+      const center: Center = {
+        lat: currentValue.regionLat,
+        lng: currentValue.regionLng,
+      }
+      handleSetCenter(center)
+    }
+    handleSelectedFilters(selectedSecondRegion)
+    setLocalStorageItem('firstRegion', selectedFirstRegion)
+    handleModalClose()
   }
 
   return (
@@ -137,22 +146,25 @@ export default function Region({
           </ListBox>
           <BottomBox>
             <SelectedStack>
-              {selectedSecondRegion.regionSecondName !== '' && (
-                <div>
-                  <span>{selectedSecondRegion.regionSecondName}</span>
+              {selectedSecondRegion?.map((item) => (
+                <Fragment key={item}>
+                  <span>
+                    {
+                      secondRegions?.find(
+                        ({ regionSecondId }) => regionSecondId === item
+                      )?.regionSecondName
+                    }
+                  </span>
                   <button
                     type="button"
                     onClick={() => {
-                      setSelectedSecondRegion({
-                        regionSecondId: 0,
-                        regionSecondName: '',
-                      })
+                      handleDeleteRegionClick(item)
                     }}
                   >
                     X
                   </button>
-                </div>
-              )}
+                </Fragment>
+              ))}
             </SelectedStack>
             <BottomBoxNav>
               <button type="button" onClick={handleResetClick}>

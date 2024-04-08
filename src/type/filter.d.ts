@@ -8,6 +8,8 @@ export type FirstRegions = FirstRegion[]
 export interface SecondRegion {
   regionSecondId: number
   regionSecondName: string
+  regionLat: number
+  regionLng: number
 }
 
 export type SecondRegions = SecondRegion[]
@@ -19,3 +21,7 @@ export interface TechStackList {
 }
 
 export type TechStackLists = TechStackList[]
+
+export type FiltersKey = 'techStacks' | 'careers' | 'region'
+
+export type Filters = { [key in FiltersKey]: number[] }

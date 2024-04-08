@@ -1,21 +1,34 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-/* eslint-disable consistent-return */
-import { type Center, type GetMeetingType } from '@/type/meeting'
+import { type GetMeeting, type Center } from '@/type/meeting'
 import instance from './axios'
-import { type CommonResponse } from '@/type/response'
+import {
+  type MeetingDetailInfo,
+  type PaginationData,
+  type PaginationResponse,
+} from '@/type/response'
 import { type Info } from '@/pages/Meeting/RegisterMeeting'
+import { type Filters } from '@/type/filter'
 
 interface GetMeetingParams {
   center: Center
-  region?: number
+  filters: Filters
 }
 
-const getMeetings = async <T = GetMeetingType[]>({
+const getMeetings = async <T = GetMeeting[]>({
   center,
-}: GetMeetingParams): Promise<T> => {
+  filters,
+}: GetMeetingParams): Promise<PaginationData<T>> => {
+  const stackQuery =
+    filters.techStacks.length > 0
+      ? filters.techStacks.map((id) => `skillId=${id}&`).join('')
+      : ''
+
+  const filterQuery =
+    filters.careers.length > 0
+      ? filters.careers.map((id) => `careerId=${id}&`).join('')
+      : ''
   try {
-    const { data } = await instance.get<CommonResponse<T>>(
-      `/api/meetings?locationLat=${center.lat}&locationLng=${center.lng}&page=1`
+    const { data } = await instance.get<PaginationResponse<T>>(
+      `/api/meetings?locationLat=${center.lat}&locationLng=${center.lng}&${stackQuery}${filterQuery}page=1`
     )
     return data.data
   } catch (error) {
@@ -74,7 +87,7 @@ const getMeetingsBySearch = (text: string) => {
   return data
 }
 
-const postMeetingData = async (newMeetingData: Info) => {
+const postMeetingData = async (newMeetingData: Info): Promise<void> => {
   try {
     await instance.post(`/api/meetings`, newMeetingData, {
       headers: {
@@ -86,4 +99,16 @@ const postMeetingData = async (newMeetingData: Info) => {
   }
 }
 
-export { getMeetings, getMeetingsBySearch, postMeetingData }
+const getMeetingDetail = async (
+  meetingId: number
+): Promise<MeetingDetailInfo> => {
+  try {
+    const { data } = await instance.get(`/api/meetings/meetings/${meetingId}`)
+    return data.data
+  } catch (error) {
+    console.log(error)
+    throw error
+  }
+}
+
+export { getMeetings, getMeetingsBySearch, postMeetingData, getMeetingDetail }
