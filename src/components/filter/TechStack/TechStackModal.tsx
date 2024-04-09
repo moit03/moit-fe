@@ -16,7 +16,10 @@ import CommonButton from '@/components/common/Button/CommonButton'
 
 interface TechStackModalProps {
   selectedFilters: number[]
-  handleSelectedFilters: (selectedNums: number[]) => void
+  handleSelectedFilters: (
+    selectedNums: number[],
+    selectedNames?: string[]
+  ) => void
   handleModalClose: () => void
 }
 
@@ -93,8 +96,12 @@ export default function TechStackModal({
     setSelectedStackItems([])
   }
 
+  const selectedStacksName = selectedStackItems.map(
+    (id) => techItems?.find(({ skillId }) => skillId === id)?.skillName
+  )
+
   const handleCompleteClick = (): void => {
-    handleSelectedFilters(selectedStackItems)
+    handleSelectedFilters(selectedStackItems, selectedStacksName as string[])
     handleModalClose()
   }
 

@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { type Service } from '@/type/user'
 import { login } from '@/apis/user'
+import { setLocalStorageItem } from '@/util/localStorage'
 
 export default function Login(): JSX.Element {
   const { service } = useParams()
@@ -14,7 +15,7 @@ export default function Login(): JSX.Element {
       .then((data) => {
         // 로그인 정보 저장
         const accessToken = data.split(' ')[1]
-        localStorage.setItem('accessToken', accessToken)
+        setLocalStorageItem('accessToken', accessToken)
       })
       .catch((error) => {
         console.log(error)

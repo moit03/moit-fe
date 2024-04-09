@@ -10,6 +10,9 @@ export interface GetMeeting {
   totalCount: number
   locationLat: number
   locationLng: number
+  locationAddress: string
+  meetingStartTime: string
+  meetingEndTime: string
   skillList: SkillList[]
   careerList: CareerList[]
 }

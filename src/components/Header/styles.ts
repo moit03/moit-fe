@@ -1,15 +1,13 @@
 import styled from 'styled-components'
 
 export const HeaderContainer = styled.header`
-  width: 24.375rem;
-  background-color: #d9d9d9;
-  height: 3.5rem;
-  position: absolute;
+  width: 100%;
+  background: #f3f4fc;
+  z-index: 2;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 1.25rem;
-  margin-top: 3rem;
 
   button {
     cursor: pointer;

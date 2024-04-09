@@ -1,8 +1,8 @@
 import { Map, MapMarker } from 'react-kakao-maps-sdk'
 
-import { useQuery } from '@tanstack/react-query'
-import { useParams } from 'react-router-dom'
-import CommonButton from '@/components/common/Button/CommonButton'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { useNavigate, useParams } from 'react-router-dom'
+// import { jwtDecode } from 'jwt-decode'
 import { RegisterTitle } from '../Meeting/styles'
 import useMap from '@/hooks/useMap'
 import DetailHeader from '@/components/DetailHeader/DetailHeader'
@@ -13,16 +13,56 @@ import {
   DetailInfoTitle,
   DetailWholeContainer,
 } from './styles'
-import { getMeetingDetail } from '@/apis/meeting'
+import { deleteMeeting, getMeetingDetail, postMeetingSub } from '@/apis/meeting'
+import JoinMeetingButton from '@/components/meeting/JoinMeetingButton/JoinMeetingButton'
+// import { getLocalStorageItem } from '@/util/localStorage'
 
 function MeetingDetail(): JSX.Element {
   useMap()
+  const navi = useNavigate()
   const { meetingId } = useParams()
 
   const { data } = useQuery({
     queryKey: ['meetingListDetail'],
     queryFn: async () => await getMeetingDetail(Number(meetingId)),
   })
+
+  const postSubMutation = useMutation({
+    mutationFn: async (meetingSubId: number) => {
+      await postMeetingSub(meetingSubId)
+    },
+    onSuccess: () => {
+      navi(`/`)
+    },
+    onError: (error) => {
+      console.log('error', error)
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await deleteMeeting(id)
+    },
+    onSuccess: () => {
+      navi('/')
+    },
+    onError: (error) => {
+      console.log('error', error)
+    },
+  })
+
+  const handleMeetingSubClick = (): void => {
+    postSubMutation.mutate(Number(meetingId))
+  }
+
+  const deleteMeetingClick = (id: number): void => {
+    deleteMutation.mutate(id)
+  }
+
+  // TODO: 추후 토큰으로 검증해서 작성자 여부 판별 예정
+  // const token: string = getLocalStorageItem('accessToken')
+  // const decodedToken = jwtDecode(token)
+  // console.log('decodedToken', decodedToken)
 
   return (
     <DetailWholeContainer>
@@ -34,6 +74,14 @@ function MeetingDetail(): JSX.Element {
           <span>{data?.meetingName}</span>
         </h1>
       </RegisterTitle>
+      <button
+        type="button"
+        onClick={() => {
+          deleteMeetingClick(Number(meetingId))
+        }}
+      >
+        삭제
+      </button>
       {/* 2 */}
       <Box>
         <div className="userInfo">
@@ -129,7 +177,7 @@ function MeetingDetail(): JSX.Element {
       </Box>
       {/* 6 */}
       <div>
-        <CommonButton size="large">모임 참여하기</CommonButton>
+        <JoinMeetingButton handleJoinMeeting={handleMeetingSubClick} />
       </div>
     </DetailWholeContainer>
   )

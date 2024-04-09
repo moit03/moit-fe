@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { throttle } from 'lodash'
+import { useNavigate } from 'react-router-dom'
 import { type GetMeeting } from '@/type/meeting'
 import {
   CardBox,
@@ -14,12 +16,36 @@ import {
 
 interface HomeMeetingsPanelProps {
   meetings: GetMeeting[]
+  handleScrollEnd: () => void
 }
 
 export default function HomeMeetingsPanel({
   meetings,
+  handleScrollEnd,
 }: HomeMeetingsPanelProps): JSX.Element {
   const [onListOpen, setOnListOpen] = useState(false)
+  const scrollBoxRef = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
+
+  const handleScroll: () => void = throttle(() => {
+    if (scrollBoxRef?.current === null) return
+    const scrollBox = scrollBoxRef.current
+
+    if (
+      scrollBox.scrollHeight - 50 <=
+      scrollBox.scrollTop + scrollBox.clientHeight
+    ) {
+      handleScrollEnd()
+    }
+  }, 500)
+
+  useEffect(() => {
+    const scrollBox = scrollBoxRef?.current
+    scrollBox?.addEventListener('scroll', handleScroll)
+    return () => {
+      scrollBox?.removeEventListener('scroll', handleScroll)
+    }
+  }, [handleScroll, onListOpen])
 
   return (
     <HomeMeetingsPanelLayout>
@@ -37,7 +63,7 @@ export default function HomeMeetingsPanel({
               setOnListOpen(!onListOpen)
             }}
           />
-          <MeetingsBox>
+          <MeetingsBox ref={scrollBoxRef}>
             <h2>내 주위 모각코</h2>
             <CardBox>
               {meetings.map(
@@ -46,19 +72,27 @@ export default function HomeMeetingsPanel({
                   meetingName,
                   registeredCount,
                   totalCount,
+                  locationAddress,
+                  meetingStartTime,
+                  meetingEndTime,
                   skillList,
                   careerList,
                 }) => (
-                  <MeetingCard key={meetingId}>
+                  <MeetingCard
+                    key={meetingId}
+                    onClick={() => {
+                      navigate(`/meetings/${meetingId}`)
+                    }}
+                  >
                     <h3>{meetingName}</h3>
                     <hr />
                     <ContentsBox>
                       <TextBox>
                         <p>2024.02.26</p>
-                        <p>20:00 - 21:00</p>
+                        <p>{`${meetingStartTime} - ${meetingEndTime}`}</p>
                       </TextBox>
                       <TextBox>
-                        <p>서울 마포구</p>
+                        <p>{`${locationAddress.split(' ')[0]} ${locationAddress.split(' ')[1]}`}</p>
                         <p>{`${registeredCount} / ${totalCount}`}</p>
                       </TextBox>
                       <TagBox>

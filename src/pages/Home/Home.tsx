@@ -1,9 +1,15 @@
 import { Map, MapMarker } from 'react-kakao-maps-sdk'
 import { useEffect, useMemo, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import useMap from '@/hooks/useMap'
-import { FilterBox, HomeLayout, MapBox } from './styles'
+import {
+  ContentsBox,
+  FilterBox,
+  HomeLayout,
+  MapBox,
+  ResetSearchBox,
+  UserLocationButtonBox,
+} from './styles'
 import { type GetMeeting, type Center } from '@/type/meeting'
 import { meetingKeys } from '@/constants/queryKeys'
 import { getMeetings } from '@/apis/meeting'
@@ -15,6 +21,8 @@ import Career from '@/components/filter/Career/Career'
 import TechStack from '@/components/filter/TechStack/TechStack'
 import { ModalBtn } from '@/components/filter/FilterFrame/styles'
 import Region from '@/components/filter/Region/Region'
+import Header from '@/components/Header/Header'
+import Footer from '@/components/Footer/Footer'
 
 export default function Home(): JSX.Element {
   const { map } = useMap()
@@ -32,14 +40,6 @@ export default function Home(): JSX.Element {
   })
   const [mapElement, setMapElement] = useState<kakao.maps.Map>()
 
-  // 좌표에 따라 데이터 패칭
-  const { data } = useQuery({
-    queryKey: meetingKeys.filter({ ...center, ...filters }),
-    queryFn: async () => await getMeetings({ center, filters }),
-  })
-
-  const meetings = useMemo(() => (data != null ? data.content : []), [data])
-
   useEffect(() => {
     // 첫 접속 시: 유저 위치 조회 후 setCenter
     const locationValue = getLocalStorageItem('center')
@@ -51,6 +51,38 @@ export default function Home(): JSX.Element {
   useEffect(() => {
     setLocalStorageItem('center', center)
   }, [center])
+
+  // 유저 위치 조회 결과를 setCenter
+  const handleUserFirstLocation = (position: GeolocationPosition): void => {
+    setCenter({
+      lat: position.coords.latitude,
+      lng: position.coords.longitude,
+    })
+  }
+
+  // 좌표에 따라 데이터 패칭
+  const { data, fetchNextPage } = useInfiniteQuery({
+    queryKey: meetingKeys.filter({ ...center, ...filters }),
+    queryFn: async ({ pageParam }) => {
+      return await getMeetings({ center, filters, pageParam })
+    },
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.isLast) return lastPage.nextPage
+      return undefined
+    },
+    initialPageParam: 1,
+  })
+
+  const meetings = useMemo(() => {
+    let list: GetMeeting[] = []
+    data != null &&
+      data.pages.forEach(({ result }) => (list = [...list, ...result]))
+    return list
+  }, [data])
+
+  const handleFetchPages = (): void => {
+    void fetchNextPage()
+  }
 
   // 조회한 마커가 모두 보이도록 지도 위치 조정
   useEffect(() => {
@@ -71,14 +103,6 @@ export default function Home(): JSX.Element {
 
     resetMapwithFilteredMarkers(meetings)
   }, [meetings, mapElement, map])
-
-  // 유저 위치 조회 결과를 setCenter
-  const handleUserFirstLocation = (position: GeolocationPosition): void => {
-    setCenter({
-      lat: position.coords.latitude,
-      lng: position.coords.longitude,
-    })
-  }
 
   // 현 위치 setCenter
   const setCurrentCenter = (): void => {
@@ -120,112 +144,94 @@ export default function Home(): JSX.Element {
     }
   }
 
-  const navi = useNavigate()
-
   return (
     <HomeLayout>
-      <FilterBox>
-        <Career
-          selectedFilters={filters.careers}
-          handleSelectedFilters={(num) => {
-            handleSetFilters('careers', num)
-          }}
-        />
-        <TechStack
-          selectedFilters={filters.techStacks}
-          handleSelectedFilters={(num) => {
-            handleSetFilters('techStacks', num)
-          }}
-        />
-        <Region
-          selectedFilters={filters.region}
-          handleSelectedFilters={(num) => {
-            handleSetFilters('region', num)
-          }}
-          handleSetCenter={(currentCenter: Center) => {
-            setCenter(currentCenter)
-          }}
-        />
-      </FilterBox>
-      <FilterBox style={{ left: '200px' }}>
-        <ModalBtn
-          type="button"
-          onClick={() => {
-            getUserLocation(resetMaptoUserLocation)
-          }}
-        >
-          내 위치
-        </ModalBtn>
-        <ModalBtn type="button" onClick={setCurrentCenter}>
-          재조회
-        </ModalBtn>
-        <div style={{ display: 'flex', gap: '20px', margin: '10px' }}>
-          <button
-            onClick={() => {
-              navi('/auth')
+      <Header />
+      <ContentsBox>
+        <FilterBox>
+          <Career
+            selectedFilters={filters.careers}
+            handleSelectedFilters={(num) => {
+              handleSetFilters('careers', num)
             }}
+          />
+          <TechStack
+            selectedFilters={filters.techStacks}
+            handleSelectedFilters={(num) => {
+              handleSetFilters('techStacks', num)
+            }}
+          />
+          <Region
+            selectedFilters={filters.region}
+            handleSelectedFilters={(num) => {
+              handleSetFilters('region', num)
+            }}
+            handleSetCenter={(currentCenter: Center) => {
+              setCenter(currentCenter)
+            }}
+          />
+        </FilterBox>
+        <UserLocationButtonBox>
+          <ModalBtn
             type="button"
-            style={{
-              height: '40px',
-              background: '#ddd',
-              padding: '5px',
-              borderRadius: '12px',
+            onClick={() => {
+              getUserLocation(resetMaptoUserLocation)
             }}
           >
-            로그인
-          </button>
-          <button
-            onClick={() => {
-              navi('/meetings')
+            내 위치
+          </ModalBtn>
+        </UserLocationButtonBox>
+        <ResetSearchBox>
+          <ModalBtn type="button" onClick={setCurrentCenter}>
+            현 지도에서 검색
+          </ModalBtn>
+        </ResetSearchBox>
+        {/* Todo: 현 조회 결과 페이지네이션
+          <ModalBtn type="button" onClick={handleFetchPages}>
+            다음페이지
+          </ModalBtn> */}
+        <MapBox>
+          <Map
+            center={{
+              lat: 37.5667,
+              lng: 126.9784,
             }}
-            type="button"
             style={{
-              height: '40px',
-              background: '#ddd',
-              padding: '5px',
-              borderRadius: '12px',
+              width: '100%',
+              height: '100%',
+            }}
+            maxLevel={3}
+            minLevel={13}
+            onCreate={(maps) => {
+              setMapElement(maps)
             }}
           >
-            모임 생성
-          </button>
-        </div>
-      </FilterBox>
-      <MapBox>
-        <Map
-          center={{
-            lat: 37.5667,
-            lng: 126.9784,
-          }}
-          style={{
-            width: '100%',
-            height: '100%',
-          }}
-          maxLevel={3}
-          minLevel={11}
-          onCreate={(maps) => {
-            setMapElement(maps)
-          }}
-        >
-          {meetings?.map(
-            ({ meetingName, meetingId, locationLat, locationLng }) => (
-              <MapMarker
-                key={meetingId}
-                title={meetingName}
-                image={{
-                  src: 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
-                  size: {
-                    width: 20,
-                    height: 30,
-                  },
-                }}
-                position={{ lat: locationLat, lng: locationLng }}
-              />
-            )
-          )}
-        </Map>
-      </MapBox>
-
-      {meetings != null && <HomeMeetingsPanel meetings={meetings} />}
+            {meetings?.map(
+              ({ meetingName, meetingId, locationLat, locationLng }) => (
+                <MapMarker
+                  key={meetingId}
+                  title={meetingName}
+                  image={{
+                    src: '/assets/mapMarker.svg',
+                    size: {
+                      width: 32,
+                      height: 32,
+                    },
+                  }}
+                  position={{ lat: locationLat, lng: locationLng }}
+                />
+              )
+            )}
+          </Map>
+        </MapBox>
+        {meetings != null && (
+          <HomeMeetingsPanel
+            meetings={meetings}
+            handleScrollEnd={handleFetchPages}
+          />
+        )}
+      </ContentsBox>
+      <Footer />
     </HomeLayout>
   )
 }

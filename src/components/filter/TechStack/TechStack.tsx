@@ -5,7 +5,10 @@ import { ModalBtn } from '../FilterFrame/styles'
 
 interface TechStackProps {
   selectedFilters: number[]
-  handleSelectedFilters: (selectedNums: number[]) => void
+  handleSelectedFilters: (
+    selectedNums: number[],
+    selectedNames?: string[]
+  ) => void
 }
 
 function TechStack({

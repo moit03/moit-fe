@@ -13,7 +13,14 @@ function Header(): JSX.Element {
       >
         LOGO
       </button>
-      <button type="button">검색</button>
+      <button
+        type="button"
+        onClick={() => {
+          navi('/search')
+        }}
+      >
+        검색
+      </button>
     </HeaderContainer>
   )
 }

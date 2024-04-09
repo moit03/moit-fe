@@ -21,6 +21,11 @@ interface Pageable {
   paged: boolean
   unpaged: boolean
 }
+export interface PaginationResponse<T> {
+  resultCode: Result
+  data: PaginationData<T>
+  message: string
+}
 
 export interface PaginationData<T> {
   content: T
@@ -34,10 +39,10 @@ export interface PaginationData<T> {
   empty: boolean
 }
 
-export interface PaginationResponse<T> {
-  resultCode: Result
-  data: PaginationData<T>
-  message: string
+export interface PaginationReturn<T> {
+  result: T
+  nextPage: number
+  isLast: boolean
 }
 
 export interface MeetingDetailInfo {

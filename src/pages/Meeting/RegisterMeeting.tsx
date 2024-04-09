@@ -59,6 +59,7 @@ function RegisterMeeting(): JSX.Element {
     skillIds: [],
     careerIds: [],
   })
+  const [stackName, setStackName] = useState<string[]>([])
   const dateFormat = dayjs(info.meetingDate).format('YYYY-MM-DD')
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -120,11 +121,16 @@ function RegisterMeeting(): JSX.Element {
     }))
   }
 
-  const handleTechStackClick = (selectedStacks: number[]): void => {
+  const handleTechStackClick = (
+    selectedStacks: number[],
+    selectedStacksName?: string[]
+  ): void => {
     setInfo((prevState) => ({
       ...prevState,
       skillIds: selectedStacks,
     }))
+
+    selectedStacksName != null && setStackName(selectedStacksName)
   }
 
   const handleCareerClick = (careerId: number): void => {
@@ -144,12 +150,10 @@ function RegisterMeeting(): JSX.Element {
 
   const postMutation = useMutation<any, unknown, Info>({
     mutationFn: async (newMeetingData: Info) => {
-      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
-      const response = await postMeetingData(newMeetingData)
-      return response
+      await postMeetingData(newMeetingData)
     },
-    onSuccess: (res) => {
-      console.log('res', res)
+    onSuccess: () => {
+      console.log('res')
       // navi('/')
     },
     onError: (error) => {
@@ -290,8 +294,8 @@ function RegisterMeeting(): JSX.Element {
             selectedFilters={info.skillIds}
             handleSelectedFilters={handleTechStackClick}
           />
-          {info.skillIds.map((id) => (
-            <p key={id}>{id}</p>
+          {stackName.map((name) => (
+            <p key={name}>{name}</p>
           ))}
         </InfoContainer>
         <InfoContainer>
