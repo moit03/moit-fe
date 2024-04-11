@@ -6,6 +6,8 @@ import Search from '@/pages/Search/Search'
 import RegisterMeeting from '@/pages/Meeting/RegisterMeeting'
 import LoginModal from '@/components/modal/LoginModal'
 import MeetingDetail from '@/pages/MeetingDetail/MeetingDetail'
+import Chat from '@/pages/Chat/Chat'
+import MeetingModify from '@/pages/MeetingModify/MeetingModify'
 
 function Router(): JSX.Element {
   return (
@@ -18,6 +20,11 @@ function Router(): JSX.Element {
           <Route path="/meetings" element={<RegisterMeeting />} />
           <Route path="/auth" element={<LoginModal />} />
           <Route path="/meetings/:meetingId" element={<MeetingDetail />} />
+          <Route
+            path="/meetings/:meetingId/modify"
+            element={<MeetingModify />}
+          />
+          <Route path="/meetings/:meetingId/chats" element={<Chat />} />
         </Route>
       </Routes>
     </BrowserRouter>

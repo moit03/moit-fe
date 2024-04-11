@@ -28,7 +28,8 @@ export const MeetingsBackground = styled.div`
   bottom: 0;
 `
 export const MeetingsBox = styled.div`
-  height: 37.5rem;
+  height: fit-content;
+  max-height: 37.5rem;
   overflow: scroll;
   width: 100%;
   padding: 1rem 1.25rem;

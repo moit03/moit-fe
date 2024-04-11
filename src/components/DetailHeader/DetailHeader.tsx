@@ -1,8 +1,20 @@
 import { useNavigate } from 'react-router-dom'
 import { DetailHeaderContainer } from './styles'
 
-function DetailHeader(): JSX.Element {
+interface DetailHeaderProps {
+  meetingId: number
+}
+
+function DetailHeader({ meetingId }: DetailHeaderProps): JSX.Element {
   const navi = useNavigate()
+
+  const handleHomeClick = (): void => {
+    navi(`/meetings/${meetingId}`)
+  }
+  const handleChatClick = (): void => {
+    navi(`/meetings/${meetingId}/chats`)
+  }
+
   return (
     <DetailHeaderContainer>
       <button
@@ -14,8 +26,12 @@ function DetailHeader(): JSX.Element {
         &#60;
       </button>
       <div className="toggle">
-        <button type="button">home</button>
-        <button type="button">chat</button>
+        <button type="button" onClick={handleHomeClick}>
+          home
+        </button>
+        <button type="button" onClick={handleChatClick}>
+          chat
+        </button>
       </div>
       <div>menu</div>
     </DetailHeaderContainer>

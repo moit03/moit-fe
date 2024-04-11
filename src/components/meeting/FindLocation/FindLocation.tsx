@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 import useMap from '@/hooks/useMap'
 import { type Info } from '@/pages/Meeting/RegisterMeeting'
+import { type EditMeetingReq } from '@/type/request'
 
 declare global {
   interface Window {
@@ -9,9 +10,9 @@ declare global {
 }
 
 interface Props {
-  info: Info
-  setInfo: (info: Info) => void
-  locationAddress: string
+  info: Info | EditMeetingReq
+  setInfo: React.Dispatch<React.SetStateAction<any>>
+  locationAddress: string | undefined
 }
 
 function FindLocation({ info, setInfo, locationAddress }: Props): JSX.Element {
@@ -50,11 +51,11 @@ function FindLocation({ info, setInfo, locationAddress }: Props): JSX.Element {
 
             setInfo({
               ...info,
-              locationAddress: data.address,
+              locationAddress: result[0].address_name,
               regionFirstName,
-              regionSecondName: result[0].address.region_2depth_name,
-              locationLat: result[0].y,
-              locationLng: result[0].x,
+              regionSecondName: result[0].address?.region_2depth_name,
+              locationLat: Number(result[0].y),
+              locationLng: Number(result[0].x),
             })
           }
         }

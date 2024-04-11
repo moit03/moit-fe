@@ -2,7 +2,7 @@ import { Map, MapMarker } from 'react-kakao-maps-sdk'
 
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
-// import { jwtDecode } from 'jwt-decode'
+import { jwtDecode } from 'jwt-decode'
 import { RegisterTitle } from '../Meeting/styles'
 import useMap from '@/hooks/useMap'
 import DetailHeader from '@/components/DetailHeader/DetailHeader'
@@ -13,9 +13,14 @@ import {
   DetailInfoTitle,
   DetailWholeContainer,
 } from './styles'
-import { deleteMeeting, getMeetingDetail, postMeetingSub } from '@/apis/meeting'
+import {
+  deleteMeeting,
+  deleteMeetingWithdraw,
+  getMeetingDetail,
+  postMeetingSub,
+} from '@/apis/meeting'
 import JoinMeetingButton from '@/components/meeting/JoinMeetingButton/JoinMeetingButton'
-// import { getLocalStorageItem } from '@/util/localStorage'
+import { getLocalStorageItem } from '@/util/localStorage'
 
 function MeetingDetail(): JSX.Element {
   useMap()
@@ -23,16 +28,16 @@ function MeetingDetail(): JSX.Element {
   const { meetingId } = useParams()
 
   const { data } = useQuery({
-    queryKey: ['meetingListDetail'],
+    queryKey: ['meetingListDetail', meetingId],
     queryFn: async () => await getMeetingDetail(Number(meetingId)),
   })
 
   const postSubMutation = useMutation({
-    mutationFn: async (meetingSubId: number) => {
-      await postMeetingSub(meetingSubId)
+    mutationFn: async () => {
+      await postMeetingSub(Number(meetingId))
     },
     onSuccess: () => {
-      navi(`/`)
+      navi(`/meetings/${meetingId}/chats`)
     },
     onError: (error) => {
       console.log('error', error)
@@ -40,8 +45,8 @@ function MeetingDetail(): JSX.Element {
   })
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      await deleteMeeting(id)
+    mutationFn: async () => {
+      await deleteMeeting(Number(meetingId))
     },
     onSuccess: () => {
       navi('/')
@@ -51,37 +56,63 @@ function MeetingDetail(): JSX.Element {
     },
   })
 
+  const withdrawMutation = useMutation({
+    mutationFn: async () => {
+      await deleteMeetingWithdraw(Number(meetingId))
+    },
+    onSuccess: () => {
+      navi(`/meetings/${meetingId}`)
+    },
+    onError: (error) => {
+      console.log('error', error)
+    },
+  })
+
   const handleMeetingSubClick = (): void => {
-    postSubMutation.mutate(Number(meetingId))
+    postSubMutation.mutate()
   }
 
-  const deleteMeetingClick = (id: number): void => {
-    deleteMutation.mutate(id)
+  const deleteMeetingClick = (): void => {
+    deleteMutation.mutate()
   }
 
-  // TODO: 추후 토큰으로 검증해서 작성자 여부 판별 예정
-  // const token: string = getLocalStorageItem('accessToken')
-  // const decodedToken = jwtDecode(token)
-  // console.log('decodedToken', decodedToken)
+  const withdrawMeetingClick = (): void => {
+    withdrawMutation.mutate()
+  }
+
+  const token: string = getLocalStorageItem('accessToken')
+  const decodedToken = jwtDecode(token)
 
   return (
     <DetailWholeContainer>
       {/* 헤더 */}
-      <DetailHeader />
+      <DetailHeader meetingId={Number(meetingId)} />
       {/* 1 */}
       <RegisterTitle>
         <h1>
           <span>{data?.meetingName}</span>
         </h1>
       </RegisterTitle>
-      <button
-        type="button"
-        onClick={() => {
-          deleteMeetingClick(Number(meetingId))
-        }}
-      >
-        삭제
+      <button type="button" onClick={withdrawMeetingClick}>
+        탈퇴
       </button>
+      {decodedToken.sub === data?.creatorEmail ? (
+        <>
+          <button type="button" onClick={deleteMeetingClick}>
+            삭제
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              navi(`modify`)
+            }}
+          >
+            수정
+          </button>
+        </>
+      ) : (
+        ''
+      )}
       {/* 2 */}
       <Box>
         <div className="userInfo">
@@ -161,7 +192,7 @@ function MeetingDetail(): JSX.Element {
               key={`${meetingId}`}
               // title={meetingName}
               image={{
-                src: 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
+                src: '/assets/mapMarker.svg',
                 size: {
                   width: 20,
                   height: 30,

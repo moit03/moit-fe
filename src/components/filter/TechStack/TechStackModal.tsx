@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import ModalPortal from '@/components/modals/ModalPortal'
 import {
@@ -10,11 +9,11 @@ import {
   SelectedStack,
   TechStackInput,
 } from '../FilterFrame/styles'
-import { getTechStackList } from '@/apis/filter'
-import { type TechStackList } from '@/type/filter'
+import { type TechStackLists, type TechStackList } from '@/type/filter'
 import CommonButton from '@/components/common/Button/CommonButton'
 
 interface TechStackModalProps {
+  techItems: TechStackLists
   selectedFilters: number[]
   handleSelectedFilters: (
     selectedNums: number[],
@@ -24,6 +23,7 @@ interface TechStackModalProps {
 }
 
 export default function TechStackModal({
+  techItems,
   selectedFilters,
   handleSelectedFilters,
   handleModalClose,
@@ -32,12 +32,6 @@ export default function TechStackModal({
   const [selectedStackItems, setSelectedStackItems] = useState<number[]>(
     selectedFilters ?? []
   )
-
-  // 기술스택 데이터 가져오기
-  const { data: techItems } = useQuery({
-    queryKey: ['stackList'],
-    queryFn: async () => await getTechStackList(),
-  })
 
   // 기술 선택
   const handleStackClick = (stackItem: number): void => {

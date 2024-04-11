@@ -1,3 +1,9 @@
 /* eslint-disable import/prefer-default-export */
 type Service = 'naver' | 'kakao'
-export type { Service }
+
+interface Login {
+  username: string
+  accessToken: string
+  refreshToken: string
+}
+export type { Service, Login }

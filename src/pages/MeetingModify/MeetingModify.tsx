@@ -1,8 +1,6 @@
-import { useNavigate } from 'react-router-dom'
-import React, { useState } from 'react'
-import dayjs from 'dayjs'
-import { useMutation } from '@tanstack/react-query'
-import CommonButton from '@/components/common/Button/CommonButton'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import {
   AccountContainer,
   CareerContainer,
@@ -15,52 +13,66 @@ import {
   PriceBox,
   RegisterTitle,
   WholeContainer,
-} from './styles'
-
-import DateChoice from '@/components/meeting/DateChoice/DateChoice'
-import TimeChoice from '@/components/meeting/TimeChoice/TimeChoice'
+} from '../Meeting/styles'
 import FindLocation from '@/components/meeting/FindLocation/FindLocation'
-import { careerData, type Career } from '@/constants/careerData'
-import { postMeetingData } from '@/apis/meeting'
 import TechStack from '@/components/filter/TechStack/TechStack'
+import CommonButton from '@/components/common/Button/CommonButton'
+import { editMeeting, getMeetingDetail } from '@/apis/meeting'
+import useMap from '@/hooks/useMap'
+import { type EditMeetingReq } from '@/type/request'
+import { type Career, careerData } from '@/constants/careerData'
 
-export interface Info {
-  meetingName: string
-  meetingDate: Date | null | undefined
-  meetingStartTime: Date | null | undefined
-  meetingEndTime: Date | null | undefined
-  budget: number
-  contents: string
-  totalCount: number
-  locationAddress: string | undefined
-  locationLat: number | undefined
-  locationLng: number | undefined
-  regionFirstName: string | undefined
-  regionSecondName: string | undefined
-  skillIds: number[]
-  careerIds: number[]
-}
-
-function RegisterMeeting(): JSX.Element {
+function MeetingModify(): JSX.Element {
+  useMap()
   const navi = useNavigate()
-  const [info, setInfo] = useState<Info>({
-    meetingName: '',
-    meetingDate: null,
-    meetingStartTime: null,
-    meetingEndTime: null,
-    budget: 0,
-    contents: '',
-    totalCount: 2,
-    locationAddress: '',
-    locationLat: 0,
-    locationLng: 0,
+  const { meetingId } = useParams()
+
+  // 비동기
+  const { data } = useQuery({
+    queryKey: ['meetingListDetail', meetingId],
+    queryFn: async () => await getMeetingDetail(Number(meetingId)),
+  })
+
+  const [stackName, setStackName] = useState<string[]>([])
+  const [info, setInfo] = useState<EditMeetingReq>({
+    meetingName: data?.meetingName,
+    budget: data?.budget,
+    contents: data?.contents,
+    totalCount: data?.totalCount,
+    locationAddress: data?.locationAddress,
+    locationLat: data?.locationLat,
+    locationLng: data?.locationLng,
     regionFirstName: '',
     regionSecondName: '',
     skillIds: [],
     careerIds: [],
   })
-  const [stackName, setStackName] = useState<string[]>([])
-  const dateFormat = dayjs(info.meetingDate).format('YYYY-MM-DD')
+
+  useEffect(() => {
+    setInfo({
+      meetingName: data?.meetingName,
+      budget: data?.budget,
+      contents: data?.contents,
+      totalCount: data?.totalCount,
+      locationAddress: data?.locationAddress,
+      locationLat: data?.locationLat,
+      locationLng: data?.locationLng,
+      regionFirstName: '',
+      regionSecondName: '',
+      skillIds: [],
+      careerIds: [],
+    })
+  }, [data])
+
+  const editMutation = useMutation({
+    mutationFn: async () => {
+      await editMeeting(Number(meetingId), info)
+    },
+    onSuccess: () => {},
+    onError: (err) => {
+      console.log(err)
+    },
+  })
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setInfo((prevState) => ({
@@ -77,28 +89,6 @@ function RegisterMeeting(): JSX.Element {
     }))
   }
 
-  const handleDateChange = (date: Date): void => {
-    setInfo((prevState) => ({
-      ...prevState,
-      meetingDate: date,
-    }))
-  }
-
-  const handleStartTimeChange = (time: Date | null): void => {
-    // console.log('time111111', time)
-    setInfo((prevState) => ({
-      ...prevState,
-      meetingStartTime: time,
-    }))
-  }
-
-  const handleEndTimeChange = (time: Date | null): void => {
-    setInfo((prevState) => ({
-      ...prevState,
-      meetingEndTime: time,
-    }))
-  }
-
   const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const budgetValue: number = parseInt(e.target.value, 10)
     setInfo((prevState) => ({
@@ -110,14 +100,16 @@ function RegisterMeeting(): JSX.Element {
   const handleMemCountUpClick = (): void => {
     setInfo((prevState) => ({
       ...prevState,
-      totalCount: prevState.totalCount + 1,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      totalCount: prevState.totalCount! + 1,
     }))
   }
 
   const handleMemCountDownClick = (): void => {
     setInfo((prevState) => ({
       ...prevState,
-      totalCount: prevState.totalCount - 1,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      totalCount: prevState.totalCount! - 1,
     }))
   }
 
@@ -148,36 +140,8 @@ function RegisterMeeting(): JSX.Element {
     })
   }
 
-  const postMutation = useMutation<any, unknown, Info>({
-    mutationFn: async (newMeetingData: Info) => {
-      await postMeetingData(newMeetingData)
-    },
-    onSuccess: () => {
-      navi('/')
-    },
-    onError: (error) => {
-      console.log('error', error)
-    },
-  })
-
-  const handleMeetingSubmit = (): void => {
-    const newMeetingData = {
-      meetingName: info.meetingName,
-      meetingDate: dateFormat as unknown as Date,
-      meetingStartTime: info.meetingStartTime,
-      meetingEndTime: info.meetingEndTime,
-      budget: info.budget,
-      contents: info.contents,
-      totalCount: info.totalCount,
-      locationAddress: info.locationAddress,
-      locationLat: info.locationLat,
-      locationLng: info.locationLng,
-      regionFirstName: info.regionFirstName,
-      regionSecondName: info.regionSecondName,
-      skillIds: info.skillIds,
-      careerIds: info.careerIds,
-    }
-    postMutation.mutate(newMeetingData)
+  const handleMeetingModifySubmit = (): void => {
+    editMutation.mutate()
   }
 
   return (
@@ -232,17 +196,7 @@ function RegisterMeeting(): JSX.Element {
           <InfoTitle>언제 만날까요?</InfoTitle>
           <InputBox>
             <span>모임 날짜</span>
-            <DateChoice
-              meetingDate={info.meetingDate}
-              handleDateChange={handleDateChange}
-            />
           </InputBox>
-          <TimeChoice
-            startTime={info.meetingStartTime}
-            endTime={info.meetingEndTime}
-            handleStartTimeChange={handleStartTimeChange}
-            handleEndTimeChange={handleEndTimeChange}
-          />
         </InfoContainer>
         {/* 위치 찾기 */}
         <InfoContainer>
@@ -252,11 +206,6 @@ function RegisterMeeting(): JSX.Element {
             setInfo={setInfo}
             locationAddress={info.locationAddress}
           />
-          {/* <input
-            className="where"
-            type="text"
-            placeholder="모임 장소 이름이나 주소를 검색해 보세요"
-          /> */}
         </InfoContainer>
         <InfoContainer>
           <InfoTitle>몇 명이서 모일까요?</InfoTitle>
@@ -314,11 +263,11 @@ function RegisterMeeting(): JSX.Element {
           </CareerContainer>
         </InfoContainer>
       </div>
-      <CommonButton size="large" handleClick={handleMeetingSubmit}>
-        생성하기
+      <CommonButton size="large" handleClick={handleMeetingModifySubmit}>
+        수정하기
       </CommonButton>
     </WholeContainer>
   )
 }
 
-export default RegisterMeeting
+export default MeetingModify

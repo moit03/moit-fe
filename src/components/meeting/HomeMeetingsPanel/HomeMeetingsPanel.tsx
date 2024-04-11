@@ -73,6 +73,7 @@ export default function HomeMeetingsPanel({
                   registeredCount,
                   totalCount,
                   locationAddress,
+                  meetingDate,
                   meetingStartTime,
                   meetingEndTime,
                   skillList,
@@ -88,7 +89,7 @@ export default function HomeMeetingsPanel({
                     <hr />
                     <ContentsBox>
                       <TextBox>
-                        <p>2024.02.26</p>
+                        <p>{meetingDate}</p>
                         <p>{`${meetingStartTime} - ${meetingEndTime}`}</p>
                       </TextBox>
                       <TextBox>

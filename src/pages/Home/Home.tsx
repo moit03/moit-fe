@@ -23,6 +23,7 @@ import { ModalBtn } from '@/components/filter/FilterFrame/styles'
 import Region from '@/components/filter/Region/Region'
 import Header from '@/components/Header/Header'
 import Footer from '@/components/Footer/Footer'
+import HomeSelectedMeetingPanel from '@/components/meeting/HomeMeetingsPanel/HomeSelectedMeetingPanel'
 
 export default function Home(): JSX.Element {
   const { map } = useMap()
@@ -36,7 +37,7 @@ export default function Home(): JSX.Element {
   const [filters, setFilters] = useState<Filters>({
     techStacks: getLocalStorageItem('techStacks') ?? [],
     careers: getLocalStorageItem('careers') ?? [],
-    region: getLocalStorageItem('region' ?? []),
+    region: getLocalStorageItem('region') ?? [],
   })
   const [mapElement, setMapElement] = useState<kakao.maps.Map>()
 
@@ -144,6 +145,18 @@ export default function Home(): JSX.Element {
     }
   }
 
+  const [selectedMeeting, setSelectedMeeting] = useState<GetMeeting | null>(
+    null
+  )
+
+  const handleSelectMarker = (e: kakao.maps.Marker): void => {
+    const selectedTitle = e.getTitle()
+    const target = meetings.filter(
+      ({ meetingName }) => meetingName === selectedTitle
+    )
+    setSelectedMeeting(target[0])
+  }
+
   return (
     <HomeLayout>
       <Header />
@@ -211,11 +224,13 @@ export default function Home(): JSX.Element {
                 <MapMarker
                   key={meetingId}
                   title={meetingName}
+                  onClick={handleSelectMarker}
                   image={{
                     src: '/assets/mapMarker.svg',
                     size: {
-                      width: 32,
-                      height: 32,
+                      width: meetingId === selectedMeeting?.meetingId ? 44 : 32,
+                      height:
+                        meetingId === selectedMeeting?.meetingId ? 44 : 32,
                     },
                   }}
                   position={{ lat: locationLat, lng: locationLng }}
@@ -228,6 +243,14 @@ export default function Home(): JSX.Element {
           <HomeMeetingsPanel
             meetings={meetings}
             handleScrollEnd={handleFetchPages}
+          />
+        )}
+        {selectedMeeting != null && (
+          <HomeSelectedMeetingPanel
+            meeting={selectedMeeting}
+            handleClosePanel={() => {
+              setSelectedMeeting(null)
+            }}
           />
         )}
       </ContentsBox>

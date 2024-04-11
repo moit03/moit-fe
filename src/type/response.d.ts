@@ -1,3 +1,5 @@
+import { type ChatDataProps } from './chat'
+
 type Result = 'SUCCESS' | 'ERROR' | 'FAIL'
 
 // 기본 GET response data type
@@ -49,6 +51,7 @@ export interface MeetingDetailInfo {
   budget: number
   careerNameList: string[]
   contents: string
+  creatorEmail: string
   creatorName: string
   locationAddress: string
   locationLat: number
@@ -61,4 +64,10 @@ export interface MeetingDetailInfo {
   registeredCount: number
   totalCount: number
   skillNameList: string[]
+}
+
+export interface ChatDataResponse {
+  resultCode: Result
+  data: ChatDataProps
+  message: string
 }

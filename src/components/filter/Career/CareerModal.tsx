@@ -11,20 +11,14 @@ import {
 import CommonButton from '@/components/common/Button/CommonButton'
 
 interface CareerModalProps {
+  careerItems: Array<{ careerName: string; id: number }>
   selectedFilters: number[]
   handleSelectedFilters: (selectedNums: number[]) => void
   handleModalClose: () => void
 }
 
-const careerItems: Array<{ careerName: string; id: number }> = [
-  { careerName: '신입', id: 1 },
-  { careerName: '주니어(1~4)', id: 2 },
-  { careerName: '미들(5~8)', id: 3 },
-  { careerName: '시니어(9~12)', id: 4 },
-  { careerName: '엑스퍼트(13이상)', id: 5 },
-]
-
 export default function CareerModal({
+  careerItems,
   selectedFilters,
   handleSelectedFilters,
   handleModalClose,

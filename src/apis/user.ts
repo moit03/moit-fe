@@ -1,7 +1,7 @@
-import { type Service } from '@/type/user'
+import { type LoginRes, type Service } from '@/type/user'
 import instance from './axios'
 
-type Login = (code: string, service: Service) => Promise<string>
+type Login = (code: string, service: Service) => Promise<LoginRes>
 
 const login: Login = async (code, service) => {
   try {

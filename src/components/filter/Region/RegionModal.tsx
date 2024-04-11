@@ -1,5 +1,4 @@
 import { Fragment, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import ModalPortal from '@/components/modals/ModalPortal'
 import {
   Background,
@@ -10,44 +9,40 @@ import {
   ListBox,
   SelectedStack,
 } from '../FilterFrame/styles'
-import { filterKeys } from '@/constants/queryKeys'
-import { getFirstRegions, getSecondRegions } from '@/apis/filter'
-import { type SecondRegion, type FirstRegion } from '@/type/filter'
+import {
+  type SecondRegion,
+  type FirstRegion,
+  type FirstRegions,
+  type SecondRegions,
+} from '@/type/filter'
 import CommonButton from '@/components/common/Button/CommonButton'
 import { type Center } from '@/type/meeting'
-import { getLocalStorageItem, setLocalStorageItem } from '@/util/localStorage'
+import { setLocalStorageItem } from '@/util/localStorage'
 
 interface RegionModalProps {
+  firstRegions: FirstRegions | undefined
+  secondRegions: SecondRegions | undefined
+  selectedFirstRegion: string
   selectedFilters: number[]
+  setSelectedFirstRegion: (name: string) => void
   handleSelectedFilters: (selectedNums: number[]) => void
   handleSetCenter: (value: Center) => void
   handleModalClose: () => void
 }
 
 export default function RegionModal({
+  firstRegions,
+  secondRegions,
+  selectedFirstRegion,
   selectedFilters,
+  setSelectedFirstRegion,
   handleSelectedFilters,
   handleSetCenter,
   handleModalClose,
 }: RegionModalProps): JSX.Element | null {
-  const { data: firstRegions } = useQuery({
-    queryKey: filterKeys.firstRegion,
-    queryFn: async () => await getFirstRegions(),
-  })
-
-  const [selectedFirstRegion, setSelectedFirstRegion] = useState(
-    (getLocalStorageItem('firstRegion') as string) ?? ''
-  )
-
   const [selectedSecondRegion, setSelectedSecondRegion] = useState<number[]>(
     selectedFilters ?? []
   )
-
-  const { data: secondRegions } = useQuery({
-    queryKey: filterKeys.secondRegion(selectedFirstRegion),
-    queryFn: async () => await getSecondRegions(selectedFirstRegion),
-    enabled: !(selectedFirstRegion.length === 0),
-  })
 
   const handleSecondRegionClick = (regionItem: number): void => {
     setSelectedSecondRegion((prevRegion) => {
