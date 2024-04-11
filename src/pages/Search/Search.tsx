@@ -26,7 +26,7 @@ export default function Search(): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
 
-  const { data, fetchNextPage } = useInfiniteQuery({
+  const { data } = useInfiniteQuery({
     queryKey: meetingKeys.search(searchText),
     queryFn: async ({ pageParam }) => {
       return await getMeetingsBySearch({ text: searchText, pageParam })

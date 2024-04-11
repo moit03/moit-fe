@@ -4,7 +4,6 @@ import Login from '@/pages/Login/Login'
 import Layout from './Layout'
 import Search from '@/pages/Search/Search'
 import RegisterMeeting from '@/pages/Meeting/RegisterMeeting'
-import LoginModal from '@/components/modal/LoginModal'
 import MeetingDetail from '@/pages/MeetingDetail/MeetingDetail'
 import Chat from '@/pages/Chat/Chat'
 import MeetingModify from '@/pages/MeetingModify/MeetingModify'
@@ -18,7 +17,6 @@ function Router(): JSX.Element {
           <Route path="/search" element={<Search />} />
           <Route path="/login/:service" element={<Login />} />
           <Route path="/meetings" element={<RegisterMeeting />} />
-          <Route path="/auth" element={<LoginModal />} />
           <Route path="/meetings/:meetingId" element={<MeetingDetail />} />
           <Route
             path="/meetings/:meetingId/modify"
